@@ -25,6 +25,7 @@ public class NotificationDetails {
     private static final String MILLISECONDS_SINCE_EPOCH = "millisecondsSinceEpoch";
     private static final String CALLED_AT = "calledAt";
     private static final String REPEAT_INTERVAL = "repeatInterval";
+    private static final String REPEAT_INTERVAL_DAY = "repeatIntervalDay";
     private static final String REPEAT_TIME = "repeatTime";
     private static final String PLATFORM_SPECIFICS = "platformSpecifics";
     private static final String AUTO_CANCEL = "autoCancel";
@@ -119,6 +120,7 @@ public class NotificationDetails {
     public NotificationStyle style;
     public StyleInformation styleInformation;
     public RepeatInterval repeatInterval;
+    public int repeatIntervalDay;
     public Time repeatTime;
     public Long millisecondsSinceEpoch;
     public Long calledAt;
@@ -150,7 +152,6 @@ public class NotificationDetails {
     public Boolean showWhen;
 
 
-
     // Note: this is set on the Android to save details about the icon that should be used when re-hydrating scheduled notifications when a device has been restarted.
     public Integer iconResourceId;
 
@@ -168,6 +169,9 @@ public class NotificationDetails {
         }
         if (arguments.containsKey(REPEAT_INTERVAL)) {
             notificationDetails.repeatInterval = RepeatInterval.values()[(Integer) arguments.get(REPEAT_INTERVAL)];
+        }
+        if (arguments.containsKey(REPEAT_INTERVAL_DAY)) {
+            notificationDetails.repeatIntervalDay = (Integer) arguments.get(REPEAT_INTERVAL_DAY);
         }
         if (arguments.containsKey(REPEAT_TIME)) {
             @SuppressWarnings("unchecked")
@@ -221,12 +225,11 @@ public class NotificationDetails {
             notificationDetails.ticker = (String) platformChannelSpecifics.get(TICKER);
             notificationDetails.visibility = (Integer) platformChannelSpecifics.get(VISIBILITY);
             notificationDetails.allowWhileIdle = (Boolean) platformChannelSpecifics.get(ALLOW_WHILE_IDLE);
-            Object timeoutAfter =  platformChannelSpecifics.get(TIMEOUT_AFTER);
-            if(timeoutAfter != null) {
-                if(timeoutAfter instanceof Integer) {
+            Object timeoutAfter = platformChannelSpecifics.get(TIMEOUT_AFTER);
+            if (timeoutAfter != null) {
+                if (timeoutAfter instanceof Integer) {
                     notificationDetails.timeoutAfter = ((Integer) timeoutAfter).longValue();
-                }
-                else if(timeoutAfter instanceof Long) {
+                } else if (timeoutAfter instanceof Long) {
                     notificationDetails.timeoutAfter = (Long) timeoutAfter;
                 }
             }

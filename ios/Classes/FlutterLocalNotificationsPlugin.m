@@ -57,6 +57,7 @@ NSString *const PRESENT_BADGE = @"presentBadge";
 NSString *const BADGE_NUMBER = @"badgeNumber";
 NSString *const MILLISECONDS_SINCE_EPOCH = @"millisecondsSinceEpoch";
 NSString *const REPEAT_INTERVAL = @"repeatInterval";
+NSString *const REPEAT_INTERVAL_DAY = @"repeatIntervalDay";
 NSString *const REPEAT_TIME = @"repeatTime";
 NSString *const HOUR = @"hour";
 NSString *const MINUTE = @"minute";
@@ -281,6 +282,9 @@ typedef NS_ENUM(NSInteger, RepeatInterval) {
             notificationDetails.day = @([call.arguments[DAY] integerValue]);
         }
         notificationDetails.repeatInterval = @([call.arguments[REPEAT_INTERVAL] integerValue]);
+        if (call.arguments[REPEAT_INTERVAL_DAY]) {
+            notificationDetails.day = @([call.arguments[REPEAT_INTERVAL_DAY] integerValue]);
+        }
     }
     if(@available(iOS 10.0, *)) {
         [self showUserNotification:notificationDetails];
@@ -392,7 +396,7 @@ typedef NS_ENUM(NSInteger, RepeatInterval) {
                     timeInterval = 60 * 60 * 24 * 7;
                     break;
                 case CustomDaily:
-                    timeInterval = 60 * 60 * 24 * [notificationDetails.day intValue];
+                    timeInterval = 60 * 60 * 24 * [notificationDetails.repeatIntervalDay intValue];
                     break;
             }
             repeats = YES;
@@ -473,7 +477,7 @@ typedef NS_ENUM(NSInteger, RepeatInterval) {
                     notification.repeatInterval = NSCalendarUnitWeekOfYear;
                     break;
                 case CustomDaily:
-                    timeInterval = 60 * 60 * 24 * [notificationDetails.day intValue];
+                    timeInterval = 60 * 60 * 24 * [notificationDetails.repeatIntervalDay intValue];
                     notification.repeatInterval = NSCalendarUnitDay;
                     break;
             }

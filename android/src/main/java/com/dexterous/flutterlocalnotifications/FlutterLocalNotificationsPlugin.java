@@ -318,7 +318,7 @@ public class FlutterLocalNotificationsPlugin implements MethodCallHandler, Plugi
                 repeatInterval = 60000 * 60 * 24 * 7;
                 break;
             case CustomDaily:
-                repeatInterval = 60000 * 60 * 24 * notificationDetails.day;
+                repeatInterval = 60000 * 60 * 24 * notificationDetails.repeatIntervalDay;
                 break;
             default:
                 break;
