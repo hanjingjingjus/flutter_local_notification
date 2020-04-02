@@ -242,6 +242,25 @@ class FlutterLocalNotificationsPlugin {
     }
   }
 
+  /// Shows a notification on a daily interval at the specified time.
+  Future<void> showCustomDailyAtTime(int id, String title, String body,
+      int repeatIntervalDay, Time notificationTime, NotificationDetails notificationDetails,
+      {String payload}) async {
+    if (_platform.isAndroid) {
+      await resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.showCustomDailyAtTime(id, title, body, repeatIntervalDay, notificationTime,
+              notificationDetails?.android,
+              payload: payload);
+    } else if (_platform.isIOS) {
+      await resolvePlatformSpecificImplementation<
+              IOSFlutterLocalNotificationsPlugin>()
+          ?.showCustomDailyAtTime(
+              id, title, body, repeatIntervalDay, notificationTime, notificationDetails?.iOS,
+              payload: payload);
+    }
+  }
+
   /// Returns a list of notifications pending to be delivered/shown.
   Future<List<PendingNotificationRequest>> pendingNotificationRequests() {
     return FlutterLocalNotificationsPlatform.instance

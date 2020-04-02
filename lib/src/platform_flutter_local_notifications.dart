@@ -285,6 +285,30 @@ class IOSFlutterLocalNotificationsPlugin
     });
   }
 
+  /// Shows a notification on a daily interval at the specified time
+  Future<void> showCustomDailyAtTime(
+      int id,
+      String title,
+      String body,
+      int repeatIntervalDay,
+      Time notificationTime,
+      IOSNotificationDetails notificationDetails,
+      {String payload}) async {
+    validateId(id);
+
+    await _channel.invokeMethod('showCustomDailyAtTime', <String, dynamic>{
+      'id': id,
+      'title': title,
+      'body': body,
+      'calledAt': DateTime.now().millisecondsSinceEpoch,
+      'repeatInterval': RepeatInterval.Weekly.index,
+      'repeatTime': notificationTime.toMap(),
+      'repeatIntervalDay': repeatIntervalDay,
+      'platformSpecifics': notificationDetails?.toMap(),
+      'payload': payload ?? ''
+    });
+  }
+
   @override
   Future<void> show(int id, String title, String body,
       {IOSNotificationDetails notificationDetails, String payload}) {
