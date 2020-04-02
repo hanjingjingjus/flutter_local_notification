@@ -301,7 +301,7 @@ class IOSFlutterLocalNotificationsPlugin
       'title': title,
       'body': body,
       'calledAt': DateTime.now().millisecondsSinceEpoch,
-      'repeatInterval': RepeatInterval.Weekly.index,
+      'repeatInterval': RepeatInterval.CustomDaily.index,
       'repeatTime': notificationTime.toMap(),
       'repeatIntervalDay': repeatIntervalDay,
       'platformSpecifics': notificationDetails?.toMap(),

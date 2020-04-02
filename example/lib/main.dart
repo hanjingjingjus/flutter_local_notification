@@ -284,6 +284,14 @@ class _HomePageState extends State<HomePage> {
                       await _showWeeklyAtDayAndTime();
                     },
                   ),
+
+                  PaddedRaisedButton(
+                    buttonText:
+                        '重复通知每20天10点',
+                    onPressed: () async {
+                      await _showCustomDailyAtTime();
+                    },
+                  ),
                   PaddedRaisedButton(
                     buttonText: 'Show notification with no sound',
                     onPressed: () async {
@@ -808,6 +816,24 @@ class _HomePageState extends State<HomePage> {
         'show weekly title',
         'Weekly notification shown on Monday at approximately ${_toTwoDigitString(time.hour)}:${_toTwoDigitString(time.minute)}:${_toTwoDigitString(time.second)}',
         Day.Monday,
+        time,
+        platformChannelSpecifics);
+  }
+
+  Future<void> _showCustomDailyAtTime() async {
+    var time = Time(10, 0, 0);
+    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
+        'show weekly channel id',
+        'show weekly channel name',
+        'show weekly description');
+    var iOSPlatformChannelSpecifics = IOSNotificationDetails();
+    var platformChannelSpecifics = NotificationDetails(
+        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.showCustomDailyAtTime(
+        0,
+        'show customDaily title',
+        'CustomDaily notification shown at approximately ${_toTwoDigitString(time.hour)}:${_toTwoDigitString(time.minute)}:${_toTwoDigitString(time.second)}',
+        20,
         time,
         platformChannelSpecifics);
   }

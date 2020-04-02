@@ -50,8 +50,10 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -332,24 +334,24 @@ public class FlutterLocalNotificationsPlugin implements MethodCallHandler, Plugi
             calendar.set(Calendar.HOUR_OF_DAY, notificationDetails.repeatTime.hour);
             calendar.set(Calendar.MINUTE, notificationDetails.repeatTime.minute);
             calendar.set(Calendar.SECOND, notificationDetails.repeatTime.second);
-            if (notificationDetails.day != null) {
-                calendar.set(Calendar.DAY_OF_WEEK, notificationDetails.day);
-            }
-            //自定义重复天数
-            if (notificationDetails.repeatInterval == RepeatInterval.CustomDaily && notificationDetails.day != null) {
-                calendar.set(Calendar.DAY_OF_WEEK, notificationDetails.day);
-            }
 
+            //非自定义重复天数
+            if (notificationDetails.repeatInterval != RepeatInterval.CustomDaily&&notificationDetails.day != null) {
+                calendar.set(Calendar.DAY_OF_WEEK, notificationDetails.day);
+            }
             startTimeMilliseconds = calendar.getTimeInMillis();
         }
+
 
         // ensure that start time is in the future
         long currentTime = System.currentTimeMillis();
         while (startTimeMilliseconds < currentTime) {
             startTimeMilliseconds += repeatInterval;
         }
+        //打印
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");// HH:mm:ss
 
-        Log.e("WorkManager创建重复延时任务", notificationDetails.calledAt + "," + System.currentTimeMillis());
+        Log.i("WorkManager创建重复任务", "任务执行时间：" + simpleDateFormat.format(new Date(startTimeMilliseconds)));
 
         //WorkManager创建重复延时任务最少15分钟起步
         if (repeatInterval < 15 * 60000) {
@@ -360,14 +362,9 @@ public class FlutterLocalNotificationsPlugin implements MethodCallHandler, Plugi
         } else {
             Data data = new Data.Builder().putString("notificationDetailsJson", notificationDetailsJson).build();
 
-            Constraints constraints = new Constraints.Builder()
-                    .setRequiresCharging(true)
-                    .build();
-
             PeriodicWorkRequest periodicWorkRequest =
                     new PeriodicWorkRequest.Builder(ScheduleNotificationWorker.class, repeatInterval, TimeUnit.MILLISECONDS)
-                            .setConstraints(constraints)
-                            .setInitialDelay(notificationDetails.calledAt - System.currentTimeMillis(), TimeUnit.MILLISECONDS)
+                            .setInitialDelay(startTimeMilliseconds - System.currentTimeMillis(), TimeUnit.MILLISECONDS)
                             .setInputData(data)
                             .build();
 

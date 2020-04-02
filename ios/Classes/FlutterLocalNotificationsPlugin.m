@@ -284,7 +284,7 @@ typedef NS_ENUM(NSInteger, RepeatInterval) {
         }
         notificationDetails.repeatInterval = @([call.arguments[REPEAT_INTERVAL] integerValue]);
         if (call.arguments[REPEAT_INTERVAL_DAY]) {
-            notificationDetails.day = @([call.arguments[REPEAT_INTERVAL_DAY] integerValue]);
+            notificationDetails.repeatIntervalDay = @([call.arguments[REPEAT_INTERVAL_DAY] integerValue]);
         }
     }
     if(@available(iOS 10.0, *)) {
@@ -330,7 +330,7 @@ typedef NS_ENUM(NSInteger, RepeatInterval) {
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
     if([INITIALIZE_METHOD isEqualToString:call.method]) {
         [self initialize:call result:result];
-    } else if ([SHOW_METHOD isEqualToString:call.method] || [SCHEDULE_METHOD isEqualToString:call.method] || [PERIODICALLY_SHOW_METHOD isEqualToString:call.method] || [SHOW_DAILY_AT_TIME_METHOD isEqualToString:call.method]
+    } else if ([SHOW_METHOD isEqualToString:call.method] || [SCHEDULE_METHOD isEqualToString:call.method] || [PERIODICALLY_SHOW_METHOD isEqualToString:call.method] || [SHOW_DAILY_AT_TIME_METHOD isEqualToString:call.method]||[SHOW_CUSTOM_DAILY_AT_TIME_METHOD isEqualToString:call.method]
                || [SHOW_WEEKLY_AT_DAY_AND_TIME_METHOD isEqualToString:call.method]) {
         [self showNotification:call result:result];
     } else if([REQUEST_PERMISSIONS_METHOD isEqualToString:call.method]) {
@@ -403,16 +403,46 @@ typedef NS_ENUM(NSInteger, RepeatInterval) {
             repeats = YES;
         }
         if (notificationDetails.repeatTime != nil) {
+            
             NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier: NSCalendarIdentifierGregorian];
             NSDateComponents *dateComponents = [[NSDateComponents alloc] init];
             [dateComponents setCalendar:calendar];
-            if (notificationDetails.day != nil) {
-                [dateComponents setWeekday:[notificationDetails.day integerValue]];
-            }
             [dateComponents setHour:[notificationDetails.repeatTime.hour integerValue]];
             [dateComponents setMinute:[notificationDetails.repeatTime.minute integerValue]];
             [dateComponents setSecond:[notificationDetails.repeatTime.second integerValue]];
-            trigger = [UNCalendarNotificationTrigger triggerWithDateMatchingComponents:dateComponents repeats: repeats];
+
+            if ([notificationDetails.repeatInterval integerValue ] != CustomDaily) {
+                if( notificationDetails.day != nil){
+                    [dateComponents setWeekday:[notificationDetails.day integerValue]];
+                }
+                
+                trigger = [UNCalendarNotificationTrigger triggerWithDateMatchingComponents:dateComponents repeats: repeats];
+            }else{
+                //首次执行时间
+//                NSDate * startData = [NSDate date];
+//                NSDateComponents *componentsStart = [[NSDateComponents alloc] init];
+//                NSCalendar * calendarStart = [NSCalendar currentCalendar];
+//                [componentsStart setDay:[notificationDetails.repeatIntervalDay integerValue]];
+//                //推迟的天数
+//                startData = [calendarStart dateByAddingComponents:componentsStart toDate:startData options:NSCalendarMatchStrictly];
+//
+//                componentsStart=[calendarStart componentsInTimeZone: [NSTimeZone localTimeZone] fromDate:startData];
+//                [componentsStart setHour:[notificationDetails.repeatTime.hour integerValue]];
+//                [componentsStart setMinute:[notificationDetails.repeatTime.minute integerValue]];
+//                [componentsStart setSecond:[notificationDetails.repeatTime.second integerValue]];
+//                //定时
+//                startData = [calendarStart dateFromComponents:componentsStart];
+//
+//                //打印
+//                NSDateFormatter * formatter = [[NSDateFormatter alloc] init];
+//                formatter.dateFormat = @"yyyy年MM月dd日hh时mm分ss秒";
+//                NSLog(@"WorkManager创建重复任务 任务执行时间：%@",[formatter stringFromDate:startData]);
+//
+                //ios无法同时设置自定义间隔时间并定点
+                trigger = [UNTimeIntervalNotificationTrigger triggerWithTimeInterval:timeInterval repeats:repeats];
+            }
+            
+           
         } else {
             trigger = [UNTimeIntervalNotificationTrigger triggerWithTimeInterval:timeInterval
                                                                          repeats:repeats];
@@ -492,7 +522,11 @@ typedef NS_ENUM(NSInteger, RepeatInterval) {
                 if(notificationDetails.day != nil) {
                     [dateComponents setWeekday:[notificationDetails.day integerValue]];
                 }
-                notification.fireDate = [calendar dateFromComponents:dateComponents];
+                if ([notificationDetails.repeatInterval integerValue ] != CustomDaily) {
+                    notification.fireDate = [calendar dateFromComponents:dateComponents];
+                }else{
+                    notification.fireDate = [NSDate dateWithTimeIntervalSinceNow:timeInterval];
+                }
             } else {
                 notification.fireDate = [NSDate dateWithTimeIntervalSinceNow:timeInterval];
             }
